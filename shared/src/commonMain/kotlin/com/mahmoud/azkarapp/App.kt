@@ -186,8 +186,9 @@ fun App() {
 
     LaunchedEffect(Unit) {
         // Simulate checking for mandatory update
-        val currentVersion = getPlatform().versionCode
-        val requiredVersion = 5 // Matches the new versionCode
+        val platform = getPlatform()
+        val currentVersion = platform.versionCode
+        val requiredVersion = if (platform.isAndroid) 5 else 1 // Adjust iOS required version to 1 to match current app version
         
         if (currentVersion < requiredVersion) {
             shouldShowUpdateDialog = true
@@ -200,9 +201,17 @@ fun App() {
     }
 
     if (shouldShowUpdateDialog) {
-        ForcedUpdateDialog(onUpdateClick = {
-            uriHandler.openUri("https://play.google.com/store/apps/details?id=com.mahmoud.azkarapp")
-        })
+        val platform = getPlatform()
+        ForcedUpdateDialog(
+            isAndroid = platform.isAndroid,
+            onUpdateClick = {
+                if (platform.isAndroid) {
+                    uriHandler.openUri("https://play.google.com/store/apps/details?id=com.mahmoud.azkarapp")
+                } else {
+                    uriHandler.openUri("https://apps.apple.com/") // استبدل الرابط برابط التطبيق الخاص بك على App Store
+                }
+            }
+        )
     }
 
     MaterialTheme(

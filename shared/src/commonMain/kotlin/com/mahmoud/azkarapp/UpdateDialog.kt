@@ -27,6 +27,7 @@ import azkarapp.shared.generated.resources.*
 
 @Composable
 fun ForcedUpdateDialog(
+    isAndroid: Boolean = true,
     onUpdateClick: () -> Unit
 ) {
     Dialog(
@@ -98,46 +99,82 @@ fun ForcedUpdateDialog(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.Center
                     ) {
-                        // Custom Google Play Colored Icon moved to the LEFT (start)
-                        androidx.compose.foundation.Canvas(
-                            modifier = Modifier.size(34.dp)
-                        ) {
-                            val w = size.width
-                            val h = size.height
-                            
-                            val path = androidx.compose.ui.graphics.Path()
+                        // Custom Icon depending on platform
+                        if (isAndroid) {
+                            androidx.compose.foundation.Canvas(
+                                modifier = Modifier.size(34.dp)
+                            ) {
+                                val w = size.width
+                                val h = size.height
+                                
+                                val path = androidx.compose.ui.graphics.Path()
 
-                            // Blue part (Left)
-                            path.reset()
-                            path.moveTo(0f, 0f)
-                            path.lineTo(w * 0.55f, h * 0.5f)
-                            path.lineTo(0f, h)
-                            path.close()
-                            drawPath(path, Color(0xFF00A1F1))
+                                // Blue part (Left)
+                                path.reset()
+                                path.moveTo(0f, 0f)
+                                path.lineTo(w * 0.55f, h * 0.5f)
+                                path.lineTo(0f, h)
+                                path.close()
+                                drawPath(path, Color(0xFF00A1F1))
 
-                            // Green part (Top)
-                            path.reset()
-                            path.moveTo(0f, 0f)
-                            path.lineTo(w, h * 0.45f)
-                            path.lineTo(w * 0.55f, h * 0.5f)
-                            path.close()
-                            drawPath(path, Color(0xFF7DB700))
+                                // Green part (Top)
+                                path.reset()
+                                path.moveTo(0f, 0f)
+                                path.lineTo(w, h * 0.45f)
+                                path.lineTo(w * 0.55f, h * 0.5f)
+                                path.close()
+                                drawPath(path, Color(0xFF7DB700))
 
-                            // Yellow part (Right)
-                            path.reset()
-                            path.moveTo(w, h * 0.45f)
-                            path.lineTo(w, h * 0.55f)
-                            path.lineTo(w * 0.55f, h * 0.5f)
-                            path.close()
-                            drawPath(path, Color(0xFFFFBB00))
+                                // Yellow part (Right)
+                                path.reset()
+                                path.moveTo(w, h * 0.45f)
+                                path.lineTo(w, h * 0.55f)
+                                path.lineTo(w * 0.55f, h * 0.5f)
+                                path.close()
+                                drawPath(path, Color(0xFFFFBB00))
 
-                            // Red part (Bottom)
-                            path.reset()
-                            path.moveTo(w * 0.55f, h * 0.5f)
-                            path.lineTo(w, h * 0.55f)
-                            path.lineTo(0f, h)
-                            path.close()
-                            drawPath(path, Color(0xFFF25022))
+                                // Red part (Bottom)
+                                path.reset()
+                                path.moveTo(w * 0.55f, h * 0.5f)
+                                path.lineTo(w, h * 0.55f)
+                                path.lineTo(0f, h)
+                                path.close()
+                                drawPath(path, Color(0xFFF25022))
+                            }
+                        } else {
+                            // App Store Icon
+                            androidx.compose.foundation.Canvas(
+                                modifier = Modifier.size(34.dp)
+                            ) {
+                                val w = size.width
+                                val h = size.height
+                                val strokeW = w * 0.12f
+
+                                drawCircle(color = Color(0xFF007AFF))
+
+                                // Draw the 'A' shape
+                                drawLine(
+                                    color = Color.White,
+                                    start = androidx.compose.ui.geometry.Offset(w * 0.5f, h * 0.25f),
+                                    end = androidx.compose.ui.geometry.Offset(w * 0.25f, h * 0.75f),
+                                    strokeWidth = strokeW,
+                                    cap = androidx.compose.ui.graphics.StrokeCap.Round
+                                )
+                                drawLine(
+                                    color = Color.White,
+                                    start = androidx.compose.ui.geometry.Offset(w * 0.5f, h * 0.25f),
+                                    end = androidx.compose.ui.geometry.Offset(w * 0.75f, h * 0.75f),
+                                    strokeWidth = strokeW,
+                                    cap = androidx.compose.ui.graphics.StrokeCap.Round
+                                )
+                                drawLine(
+                                    color = Color.White,
+                                    start = androidx.compose.ui.geometry.Offset(w * 0.35f, h * 0.55f),
+                                    end = androidx.compose.ui.geometry.Offset(w * 0.65f, h * 0.55f),
+                                    strokeWidth = strokeW,
+                                    cap = androidx.compose.ui.graphics.StrokeCap.Round
+                                )
+                            }
                         }
 
                         Spacer(modifier = Modifier.width(16.dp))
