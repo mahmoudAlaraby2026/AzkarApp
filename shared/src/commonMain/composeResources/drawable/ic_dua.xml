@@ -1,0 +1,48 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="135dp"
+    android:height="130dp"
+    android:viewportWidth="135"
+    android:viewportHeight="130">
+
+    <!-- Green Background Block -->
+    <path
+        android:fillColor="#00894F"
+        android:pathData="M15,0 L120,0 L120,130 L15,130 Z" />
+
+    <!-- Gold Borders -->
+    <path android:fillColor="#C5A358" android:pathData="M10,0h4v130h-4z"/>
+    <path android:fillColor="#C5A358" android:pathData="M121,0h4v130h-4z"/>
+
+    <group android:translateX="25" android:translateY="10">
+        <!-- Door Body -->
+        <path
+            android:fillColor="#FFFFFF"
+            android:pathData="M10,0 L75,0 L75,115 L10,115 Z" />
+
+        <!-- Door Frame -->
+        <path
+            android:strokeColor="#DDDDDD"
+            android:strokeWidth="2"
+            android:pathData="M10,0 L75,0 L75,115 M10,115 L10,0" />
+
+        <!-- Symbols -->
+        <group android:translateX="30" android:translateY="25">
+            <!-- Female -->
+            <path android:fillColor="#555555" android:pathData="M6,0a2.5,2.5 0,1,1 -5,0 a2.5,2.5 0,1,1 5,0"/>
+            <path android:fillColor="#555555" android:pathData="M0,6 L7,6 L9,14 L-2,14 Z"/>
+            <path android:fillColor="#555555" android:pathData="M2,14h1v4h-1z M4,14h1v4h-1z"/>
+
+            <!-- Male -->
+            <path android:fillColor="#555555" android:pathData="M21,0a2.5,2.5 0,1,1 -5,0 a2.5,2.5 0,1,1 5,0"/>
+            <path android:fillColor="#555555" android:pathData="M16,6h5v8h-5z"/>
+            <path android:fillColor="#555555" android:pathData="M17,14h1v4h-1z M19,14h1v4h-1z"/>
+        </group>
+
+        <!-- Handle -->
+        <path
+            android:fillColor="#AAAAAA"
+            android:pathData="M18,72a2,2 0,1,1 -4,0 a2,2 0,1,1 4,0"/>
+    </group>
+
+    <path android:fillColor="#004D2C" android:pathData="M15,125h105v5h-105z"/>
+</vector>

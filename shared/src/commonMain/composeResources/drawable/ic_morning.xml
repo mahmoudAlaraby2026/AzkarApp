@@ -1,0 +1,17 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="120dp"
+    android:height="120dp"
+    android:viewportWidth="100"
+    android:viewportHeight="100">
+    <!-- Sun -->
+    <path
+        android:fillColor="#FFD700"
+        android:pathData="M50,30a20,20 0,1 1,0 40a20,20 0,1 1,0 -40z"/>
+    <!-- Rays -->
+    <path
+        android:fillColor="#FFD700"
+        android:pathData="M50,5 L50,20 M50,80 L50,95 M5,50 L20,50 M80,50 L95,50 M18,18 L28,28 M72,72 L82,82 M18,82 L28,72 M72,18 L82,28"
+        android:strokeWidth="4"
+        android:strokeColor="#FFD700"
+        android:strokeLineCap="round"/>
+</vector>

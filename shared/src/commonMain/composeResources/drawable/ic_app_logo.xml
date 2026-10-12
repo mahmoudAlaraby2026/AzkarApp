@@ -1,0 +1,69 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="200dp"
+    android:height="200dp"
+    android:viewportWidth="100"
+    android:viewportHeight="100">
+
+    <group
+        android:translateX="15"
+        android:translateY="15"
+        android:scaleX="0.7"
+        android:scaleY="0.7">
+
+        <!-- Islamic Arch Background (Blue) -->
+        <path
+            android:fillColor="#5C89E6"
+            android:pathData="M15,90 L15,45 Q15,10 50,10 Q85,10 85,45 L85,90 Z" />
+
+        <!-- Arch Border (Gold) -->
+        <path
+            android:strokeColor="#FBC02D"
+            android:strokeWidth="3.5"
+            android:strokeLineJoin="round"
+            android:pathData="M15,90 L15,45 Q15,10 50,10 Q85,10 85,45 L85,90 L15,90" />
+
+        <!-- Crescent Moon (Top Left) -->
+        <path
+            android:fillColor="#FFEB3B"
+            android:pathData="M12,10 a10,10 0,1 0,0 18 a12,12 0,1 1,0 -18z"/>
+
+        <!-- Stars -->
+        <path android:fillColor="#FFEB3B" android:pathData="M88,15l2,4l4,2l-4,2l-2,4l-2,-4l-4,-2l4,-2z"/>
+        <path android:fillColor="#FFEB3B" android:pathData="M35,38l1.5,3l3,1.5l-3,1.5l-1.5,3l-1.5,-3l-3,-1.5l3,-1.5z"/>
+
+        <!-- Person Praying (White Clothes) -->
+        <group android:translateX="35" android:translateY="30">
+            <!-- Cap -->
+            <path
+                android:fillColor="#EEEEEE"
+                android:pathData="M15,0 Q25,-5 35,0 L35,8 L15,8 Z" />
+            <!-- Face -->
+            <path
+                android:fillColor="#FCE4EC"
+                android:pathData="M15,8 L35,8 Q38,25 25,25 Q12,25 15,8 Z" />
+            <!-- Body/Thobe -->
+            <path
+                android:fillColor="#FFFFFF"
+                android:pathData="M25,25 L10,35 Q-5,60 10,65 L50,65 Q55,65 50,55 L35,30 Z" />
+
+            <!-- Raised Hands in Dua -->
+            <path
+                android:fillColor="#FCE4EC"
+                android:pathData="M12,38 Q5,42 8,50 L15,48 Z" />
+            <path
+                android:fillColor="#FCE4EC"
+                android:pathData="M18,38 Q25,42 22,50 L15,48 Z" />
+
+            <!-- Misbaha (Subha) dangling from hand -->
+            <group android:translateX="8" android:translateY="45">
+                <path android:fillColor="#A15C1E" android:pathData="M0,0a1.5,1.5 0,1,1 -3,0 a1.5,1.5 0,1,1 3,0"/>
+                <path android:fillColor="#A15C1E" android:pathData="M-1,3a1.5,1.5 0,1,1 -3,0 a1.5,1.5 0,1,1 3,0"/>
+                <path android:fillColor="#A15C1E" android:pathData="M-3,6a1.5,1.5 0,1,1 -3,0 a1.5,1.5 0,1,1 3,0"/>
+                <path android:fillColor="#A15C1E" android:pathData="M-2,9a1.5,1.5 0,1,1 -3,0 a1.5,1.5 0,1,1 3,0"/>
+                <path android:fillColor="#A15C1E" android:pathData="M1,11a1.5,1.5 0,1,1 -3,0 a1.5,1.5 0,1,1 3,0"/>
+                <!-- Tassel -->
+                <path android:fillColor="#795548" android:pathData="M1,11 L3,16 L-1,16 Z"/>
+            </group>
+        </group>
+    </group>
+</vector>

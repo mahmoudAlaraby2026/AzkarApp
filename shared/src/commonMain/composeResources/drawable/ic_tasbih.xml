@@ -1,0 +1,14 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="120dp"
+    android:height="120dp"
+    android:viewportWidth="100"
+    android:viewportHeight="100">
+    <!-- Beads -->
+    <path
+        android:fillColor="#4E342E"
+        android:pathData="M50,15a5,5 0,1 1,0 10a5,5 0,1 1,0 -10z M70,25a5,5 0,1 1,0 10a5,5 0,1 1,0 -10z M80,45a5,5 0,1 1,0 10a5,5 0,1 1,0 -10z M70,65a5,5 0,1 1,0 10a5,5 0,1 1,0 -10z M50,75a5,5 0,1 1,0 10a5,5 0,1 1,0 -10z M30,65a5,5 0,1 1,0 10a5,5 0,1 1,0 -10z M20,45a5,5 0,1 1,0 10a5,5 0,1 1,0 -10z M30,25a5,5 0,1 1,0 10a5,5 0,1 1,0 -10z"/>
+    <!-- String/Thread -->
+    <path
+        android:fillColor="#C5A358"
+        android:pathData="M50,85l0,10"/>
+</vector>

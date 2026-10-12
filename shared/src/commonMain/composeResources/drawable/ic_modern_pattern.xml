@@ -1,0 +1,14 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="200dp"
+    android:height="200dp"
+    android:viewportWidth="100"
+    android:viewportHeight="100">
+    <!-- Subtile Geometric Line Pattern -->
+    <path
+        android:strokeColor="#1A00894F"
+        android:strokeWidth="0.5"
+        android:pathData="M0,0 L100,100 M100,0 L0,100 M50,0 L50,100 M0,50 L100,50 M25,0 L75,100 M75,0 L25,100 M0,25 L100,75 M0,75 L100,25"/>
+    <path
+        android:fillColor="#0800894F"
+        android:pathData="M50,40 L60,50 L50,60 L40,50 Z M10,10 L20,20 L10,30 L0,20 Z M90,10 L100,20 L90,30 L80,20 Z M10,90 L20,100 L10,110 L0,100 Z M90,90 L100,100 L90,110 L80,100 Z"/>
+</vector>
