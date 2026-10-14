@@ -208,7 +208,7 @@ fun App() {
                 if (platform.isAndroid) {
                     uriHandler.openUri("https://play.google.com/store/apps/details?id=com.mahmoud.azkarapp")
                 } else {
-                    uriHandler.openUri("https://apps.apple.com/") // استبدل الرابط برابط التطبيق الخاص بك على App Store
+                    uriHandler.openUri("https://apps.apple.com/us/app/%D8%A3%D8%B0%D9%83%D8%A7%D8%B1-%D8%AD%D8%B5%D9%86-%D8%A7%D9%84%D9%85%D8%B3%D9%84%D9%85/id6822073243")
                 }
             }
         )
@@ -401,8 +401,13 @@ fun MainContent(
 
                         val uriHandler = androidx.compose.ui.platform.LocalUriHandler.current
                         Button(
-                            onClick = { 
-                                uriHandler.openUri("https://play.google.com/store/apps/details?id=com.mahmoud.azkarapp")
+                            onClick = {
+                                val platform = getPlatform()
+                                if (platform.isAndroid) {
+                                    uriHandler.openUri("https://play.google.com/store/apps/details?id=com.mahmoud.azkarapp")
+                                } else {
+                                    uriHandler.openUri("https://apps.apple.com/us/app/%D8%A3%D8%B0%D9%83%D8%A7%D8%B1-%D8%AD%D8%B5%D9%86-%D8%A7%D9%84%D9%85%D8%B3%D9%84%D9%85/id6822073243")
+                                }
                             },
                             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFFD54F)),
                             shape = RoundedCornerShape(25.dp),

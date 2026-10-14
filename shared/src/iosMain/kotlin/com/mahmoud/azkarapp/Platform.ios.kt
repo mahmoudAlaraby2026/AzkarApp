@@ -2,6 +2,7 @@ package com.mahmoud.azkarapp
 
 import platform.UIKit.UIDevice
 import platform.UserNotifications.*
+import platform.posix.exit
 
 class IOSPlatform: Platform {
     override val name: String = UIDevice.currentDevice.systemName() + " " + UIDevice.currentDevice.systemVersion
@@ -26,7 +27,10 @@ class IOSPlatform: Platform {
         }
     }
     
-    override fun exitApp() {}
+    override fun exitApp() {
+        exit(0)
+    }
+    
     override fun playClickSound() {}
     override fun playAlertSound() {}
     override fun vibrate(duration: Long) {}
