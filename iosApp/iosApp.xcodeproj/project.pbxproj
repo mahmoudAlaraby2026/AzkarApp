@@ -6,8 +6,13 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		SALLA_MP3_BUILD /* salla.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = SALLA_MP3_REF /* salla.mp3 */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		AD1157622ECDEBA95079646E /* AzkarApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AzkarApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		SALLA_MP3_REF /* salla.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = salla.mp3; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -15,6 +20,7 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
+				SALLA_MP3_REF,
 			);
 			target = 96D9F41501A5518C418629B7 /* iosApp */;
 		};
@@ -129,6 +135,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				SALLA_MP3_BUILD /* salla.mp3 in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -53,7 +53,7 @@ actual class TextToSpeechManager(private val context: Context, private val tts: 
         val mappedId = getLocalFileId(id)
         fetchJob = CoroutineScope(Dispatchers.Main).launch {
             try {
-                val tempFile = File(context.cacheDir, if (id == 25 || id == 47) "salla.mp3" else if (id == 5) "asbahna.mp3" else if (id == 7 || id == 32) "sayyid.mp3" else if (id == 11 || id == 36) "raditu.mp3" else if (id == 18 || id == 43) "ashhaduka.mp3" else if (id == 21) "min_nima.mp3" else "mishary_v2_$mappedId.mp3")
+                val tempFile = File(context.cacheDir, if (id == 25 || id == 47) "salla.mp3" else if (id == 5) "asbahna.mp3" else if (id == 7 || id == 32) "sayyid.mp3" else if (id == 11 || id == 36) "raditu.mp3" else if (id == 18 || id == 43) "ashhaduka.mp3" else if (id == 21) "min_nima.mp3" else if (id == 13 || id == 38) "hasbi_allah.mp3" else "mishary_v2_$mappedId.mp3")
                 if (!tempFile.exists() || tempFile.length() == 0L) {
                     val bytes = withContext(Dispatchers.IO) {
                         if (id == 25 || id == 47) {
@@ -68,6 +68,8 @@ actual class TextToSpeechManager(private val context: Context, private val tts: 
                             Res.readBytes("files/audio/ashhaduka.mp3")
                         } else if (id == 21) {
                             Res.readBytes("files/audio/min_nima.mp3")
+                        } else if (id == 13 || id == 38) {
+                            Res.readBytes("files/audio/hasbi_allah.mp3")
                         } else {
                             Res.readBytes("files/audio/mishary/$mappedId.mp3")
                         }

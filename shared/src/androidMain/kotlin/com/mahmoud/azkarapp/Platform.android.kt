@@ -25,7 +25,7 @@ class AndroidPlatform(private val context: Context) : Platform {
         }
 
     override fun showTestNotification() {
-        val channelId = "salla_periodic_channel_v2"
+        val channelId = "salla_periodic_channel_v6"
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -44,6 +44,8 @@ class AndroidPlatform(private val context: Context) : Platform {
                         .setUsage(android.media.AudioAttributes.USAGE_NOTIFICATION)
                         .build()
                     channel.setSound(soundUri, audioAttributes)
+                    channel.enableVibration(true)
+                    channel.vibrationPattern = longArrayOf(0, 250, 250, 250)
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -58,16 +60,15 @@ class AndroidPlatform(private val context: Context) : Platform {
             .setContentText("صلّ على سيدنا محمد")
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setAutoCancel(true)
+            .setVibrate(longArrayOf(0, 250, 250, 250))
 
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
-             try {
-                val resId = context.resources.getIdentifier("salla", "raw", context.packageName)
-                if (resId != 0) {
-                    val soundUri = android.net.Uri.parse(android.content.ContentResolver.SCHEME_ANDROID_RESOURCE + "://" + context.packageName + "/" + resId)
-                    builder.setSound(soundUri)
-                }
-            } catch (e: Exception) {}
-        }
+        try {
+            val resId = context.resources.getIdentifier("salla", "raw", context.packageName)
+            if (resId != 0) {
+                val soundUri = android.net.Uri.parse(android.content.ContentResolver.SCHEME_ANDROID_RESOURCE + "://" + context.packageName + "/" + resId)
+                builder.setSound(soundUri)
+            }
+        } catch (e: Exception) {}
 
         notificationManager.notify(1, builder.build())
     }

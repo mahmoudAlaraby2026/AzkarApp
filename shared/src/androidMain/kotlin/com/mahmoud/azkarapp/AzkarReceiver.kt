@@ -26,20 +26,20 @@ class AzkarReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
         if (intent.action == Intent.ACTION_BOOT_COMPLETED) {
-            scheduleExact(context)
+            scheduleExact(context, force = true)
             return
         }
 
         showNotification(context)
         // Schedule the next one exactly in 15 minutes
-        scheduleExact(context)
+        scheduleExact(context, force = true)
     }
 
     private fun showNotification(context: Context) {
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         val randomZekr = azkarList.random()
         
-        val channelId = "azkar_periodic_channel_v2"
+        val channelId = "azkar_periodic_channel_v6"
         val channelName = "أذكار تنبيهية"
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -53,7 +53,7 @@ class AzkarReceiver : BroadcastReceiver() {
         }
 
         val appIcon = context.applicationInfo.icon
-        val launchIntent = context.packageManager.getLaunchIntentForPackage(context.packageName)
+        val launchIntent = context.packageManager.getLaunchIntentForPackage(context.packageName) ?: Intent()
         val pendingIntent = PendingIntent.getActivity(
             context, 
             0, 
@@ -69,12 +69,27 @@ class AzkarReceiver : BroadcastReceiver() {
             .setAutoCancel(true)
             .setContentIntent(pendingIntent)
 
-        notificationManager.cancel(3000)
-        notificationManager.notify(3000, notificationBuilder.build())
+        val prefs = context.getSharedPreferences("azkar_prefs", Context.MODE_PRIVATE)
+        val lastId = prefs.getInt("azkar_notif_id", 3000)
+        val nextId = if (lastId == 3000) 3001 else 3000
+        prefs.edit().putInt("azkar_notif_id", nextId).apply()
+
+        notificationManager.cancel(lastId)
+        notificationManager.notify(nextId, notificationBuilder.build())
     }
 
     companion object {
-        fun scheduleExact(context: Context) {
+        fun scheduleExact(context: Context, force: Boolean = false) {
+            val prefs = context.getSharedPreferences("azkar_prefs", Context.MODE_PRIVATE)
+            val now = System.currentTimeMillis()
+            val nextAlarm = prefs.getLong("azkar_next_alarm", 0)
+            val interval = 15 * 60 * 1000L
+            
+            // If not forced and the alarm is already scheduled for the future, don't overwrite it
+            if (!force && nextAlarm > now && (nextAlarm - now) <= interval) {
+                return
+            }
+
             val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
             val intent = Intent(context, AzkarReceiver::class.java)
             val pendingIntent = PendingIntent.getBroadcast(
@@ -84,21 +99,19 @@ class AzkarReceiver : BroadcastReceiver() {
                 PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
             )
             
-            // 15 minutes
-            val triggerTime = System.currentTimeMillis() + 15 * 60 * 1000
+            val triggerTime = now + interval
+            prefs.edit().putLong("azkar_next_alarm", triggerTime).apply()
             
             try {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                        if (alarmManager.canScheduleExactAlarms()) {
-                            alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerTime, pendingIntent)
-                        } else {
-                            // Fallback if permission not granted
-                            alarmManager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerTime, pendingIntent)
-                        }
-                    } else {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    if (alarmManager.canScheduleExactAlarms()) {
                         alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerTime, pendingIntent)
+                    } else {
+                        // Fallback if permission not granted
+                        alarmManager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerTime, pendingIntent)
                     }
+                } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerTime, pendingIntent)
                 } else {
                     alarmManager.setExact(AlarmManager.RTC_WAKEUP, triggerTime, pendingIntent)
                 }
