@@ -36,35 +36,6 @@ actual class TextToSpeechManager(private val context: Context, private val tts: 
         stop()
         isStopped = false
 
-        // Check if this is the "صل على محمد" dhikr, and try to play offline resource first
-        if (id == 20 || id == 49) {
-            try {
-                val resId = context.resources.getIdentifier("salla", "raw", context.packageName)
-                if (resId != 0) {
-                    val player = MediaPlayer.create(context, resId)
-                    if (player != null) {
-                        mediaPlayer = player
-                        player.setOnCompletionListener {
-                            try { it.release() } catch (e: Exception) {}
-                            mediaPlayer = null
-                            if (!isStopped) onComplete()
-                        }
-                        player.setOnErrorListener { _, _, _ ->
-                            try { player.release() } catch (e: Exception) {}
-                            mediaPlayer = null
-                            // If local fails, try URL
-                            playWithLocalCache(id, text, onComplete)
-                            true
-                        }
-                        player.start()
-                        return
-                    }
-                }
-            } catch (e: Exception) {
-                // Ignore and fallback to URL
-            }
-        }
-
         playWithLocalCache(id, text, onComplete)
     }
 
@@ -82,10 +53,24 @@ actual class TextToSpeechManager(private val context: Context, private val tts: 
         val mappedId = getLocalFileId(id)
         fetchJob = CoroutineScope(Dispatchers.Main).launch {
             try {
-                val tempFile = File(context.cacheDir, "mishary_v2_$mappedId.mp3")
+                val tempFile = File(context.cacheDir, if (id == 25 || id == 47) "salla.mp3" else if (id == 5) "asbahna.mp3" else if (id == 7 || id == 32) "sayyid.mp3" else if (id == 11 || id == 36) "raditu.mp3" else if (id == 18 || id == 43) "ashhaduka.mp3" else if (id == 21) "min_nima.mp3" else "mishary_v2_$mappedId.mp3")
                 if (!tempFile.exists() || tempFile.length() == 0L) {
                     val bytes = withContext(Dispatchers.IO) {
-                        Res.readBytes("files/audio/mishary/$mappedId.mp3")
+                        if (id == 25 || id == 47) {
+                            Res.readBytes("files/audio/salla.mp3")
+                        } else if (id == 5) {
+                            Res.readBytes("files/audio/asbahna.mp3")
+                        } else if (id == 7 || id == 32) {
+                            Res.readBytes("files/audio/sayyid.mp3")
+                        } else if (id == 11 || id == 36) {
+                            Res.readBytes("files/audio/raditu.mp3")
+                        } else if (id == 18 || id == 43) {
+                            Res.readBytes("files/audio/ashhaduka.mp3")
+                        } else if (id == 21) {
+                            Res.readBytes("files/audio/min_nima.mp3")
+                        } else {
+                            Res.readBytes("files/audio/mishary/$mappedId.mp3")
+                        }
                     }
                     if (isStopped) return@launch
                     withContext(Dispatchers.IO) {
