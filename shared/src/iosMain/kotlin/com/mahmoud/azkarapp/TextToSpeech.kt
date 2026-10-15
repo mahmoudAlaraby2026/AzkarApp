@@ -72,6 +72,8 @@ actual class TextToSpeechManager {
                     Res.readBytes("files/audio/min_nima.mp3")
                 } else if (id == 13 || id == 38) {
                     Res.readBytes("files/audio/hasbi_allah.mp3")
+                } else if (id == 10 || id == 35) {
+                    Res.readBytes("files/audio/bismillah.mp3")
                 } else {
                     Res.readBytes("files/audio/mishary/$mappedId.mp3")
                 }
