@@ -59,6 +59,8 @@ import coil3.compose.AsyncImage
 import azkarapp.shared.generated.resources.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.onEach
 
 // Exact colors from the screenshots
 val HeaderGreen = Color(0xFF00894F)
@@ -761,6 +763,7 @@ fun DuaCategoriesScreen(onDuaClick: (String) -> Unit) {
     }
 }
 
+@OptIn(kotlin.ExperimentalMultiplatform::class)
 @Composable
 fun AzkarReaderScreen(
     category: String,
@@ -787,38 +790,42 @@ fun AzkarReaderScreen(
     val currentZekr = azkar[currentIndex]
     var remainingRepetitions by remember(currentIndex) { mutableStateOf(currentZekr.count) }
 
-    val ttsManager = rememberTextToSpeechManager()
+    val playerState = io.github.rufenkhokhar.rememberKMPPlayerState()
     var isSpeaking by remember { mutableStateOf(false) }
-    val scope = rememberCoroutineScope()
 
     LaunchedEffect(currentIndex) {
-        ttsManager.stop()
+        playerState.stop()
         isSpeaking = false
     }
 
     DisposableEffect(Unit) {
         onDispose {
-            ttsManager.stop()
+            playerState.stop()
+            playerState.destroy()
             isSpeaking = false
         }
     }
 
-    fun playLoop() {
-        if (!isSpeaking) return
-        ttsManager.speakWithMishary(currentZekr.id, currentZekr.text) {
-            if (!isSpeaking) return@speakWithMishary
-            if (remainingRepetitions > 1) {
-                remainingRepetitions--
-                scope.launch {
-                    delay(1000) // wait a second before repeating
-                    playLoop()
+    LaunchedEffect(playerState) {
+        playerState.observePlayerEvent().collect { event ->
+            if (event is io.github.rufenkhokhar.KMPPlayerEvent.Ended) {
+                if (!isSpeaking) return@collect
+                if (remainingRepetitions > 1) {
+                    remainingRepetitions--
+                    delay(1000)
+                    if (isSpeaking && currentZekr.audio.isNotBlank()) {
+                        playerState.setFileUrl(Res.getUri("files/audio/${currentZekr.audio}"))
+                        playerState.play()
+                    }
+                } else {
+                    isSpeaking = false
+                    // Automatically move to the next Zekr when done reading completely
+                    if (currentIndex < azkar.size - 1) {
+                        currentIndex++
+                    }
                 }
-            } else {
+            } else if (event is io.github.rufenkhokhar.KMPPlayerEvent.Error) {
                 isSpeaking = false
-                // Automatically move to the next Zekr when done reading completely
-                if (currentIndex < azkar.size - 1) {
-                    currentIndex++
-                }
             }
         }
     }
@@ -830,25 +837,7 @@ fun AzkarReaderScreen(
             title = category,
             onBack = onBack,
             showBack = true,
-            backgroundColor = headerBgColor,
-            trailingIcon = {
-                IconButton(onClick = {
-                    if (isSpeaking) {
-                        ttsManager.stop()
-                        isSpeaking = false
-                    } else {
-                        isSpeaking = true
-                        playLoop()
-                    }
-                }) {
-                    Icon(
-                        imageVector = if (isSpeaking) Icons.Default.Pause else Icons.AutoMirrored.Filled.VolumeUp,
-                        contentDescription = if (isSpeaking) "إيقاف القراءة" else "استماع للذكر",
-                        tint = Color.White,
-                        modifier = Modifier.size(30.dp)
-                    )
-                }
-            }
+            backgroundColor = headerBgColor
         )
 
         // Content Area
@@ -963,6 +952,31 @@ fun AzkarReaderScreen(
                     Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = "Previous",
                     tint = if (currentIndex > 0) Color.White else Color.White.copy(alpha = 0.5f),
+                    modifier = Modifier.size(36.dp)
+                )
+            }
+
+            // Play/Pause Button
+            IconButton(
+                onClick = { 
+                    if (currentZekr.audio.isNotBlank()) {
+                        if (isSpeaking) {
+                            playerState.stop()
+                            isSpeaking = false
+                        } else {
+                            isSpeaking = true
+                            playerState.setFileUrl(Res.getUri("files/audio/${currentZekr.audio}"))
+                            playerState.play()
+                        }
+                    }
+                },
+                enabled = currentZekr.audio.isNotBlank(),
+                modifier = Modifier.weight(1f)
+            ) {
+                Icon(
+                    imageVector = if (isSpeaking) Icons.Default.Pause else Icons.Default.PlayArrow,
+                    contentDescription = if (isSpeaking) "إيقاف القراءة" else "استماع للذكر",
+                    tint = if (currentZekr.audio.isNotBlank()) Color.White else Color.White.copy(alpha = 0.5f),
                     modifier = Modifier.size(36.dp)
                 )
             }

@@ -7,5 +7,6 @@ data class Zekr(
     val id: Int,
     val category: String,
     val text: String,
-    val count: Int
+    val count: Int,
+    val audio: String = ""
 )
