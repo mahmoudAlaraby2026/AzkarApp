@@ -824,13 +824,15 @@ fun AzkarReaderScreen(
                 if (isSpeaking && !isChangingZekr) {
                     if (remainingRepetitions > 1) {
                         scope.launch {
+                            isChangingZekr = true
                             remainingRepetitions--
-                            // في iOS يجب إرجاع الوقت إلى 0 ثم تشغيل الصوت
-                            playerState.seekTo(0)
-                            // إعادة تمرير مسار الملف مجدداً لضمان إعادة تفعيل المشغل
-                            playerState.setFileUrl(Res.getUri("files/audio/${currentZekr.audio}"))
+                            playerState.stop()
                             kotlinx.coroutines.delay(100)
+                            playerState.setFileUrl(Res.getUri("files/audio/${currentZekr.audio}"))
+                            playerState.seekTo(0)
                             playerState.play()
+                            kotlinx.coroutines.delay(200)
+                            isChangingZekr = false
                         }
                     } else {
                         // عند اكتمال كل التكرارات للذكر الحالي:
