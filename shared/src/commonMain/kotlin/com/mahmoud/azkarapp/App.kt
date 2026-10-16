@@ -795,12 +795,14 @@ fun AzkarReaderScreen(
     var isSpeaking by remember { mutableStateOf(false) }
     var isChangingZekr by remember { mutableStateOf(false) }
 
-    LaunchedEffect(currentZekr) {
+    LaunchedEffect(currentZekr, remainingRepetitions) {
         isChangingZekr = true
         playerState.stop()
+        kotlinx.coroutines.delay(100)
         if (isSpeaking && currentZekr.audio.isNotBlank()) {
             playerState.setFileUrl(Res.getUri("files/audio/${currentZekr.audio}"))
             playerState.seekTo(0)
+            kotlinx.coroutines.delay(100)
             playerState.play()
         } else {
             isSpeaking = false
@@ -818,27 +820,16 @@ fun AzkarReaderScreen(
     }
 
     LaunchedEffect(playerState) {
-        val scope = this
         playerState.observePlayerEvent().collect { event ->
             if (event is io.github.rufenkhokhar.KMPPlayerEvent.Ended) {
                 if (isSpeaking && !isChangingZekr) {
                     if (remainingRepetitions > 1) {
-                        scope.launch {
-                            isChangingZekr = true
-                            remainingRepetitions--
-                            playerState.stop()
-                            kotlinx.coroutines.delay(100)
-                            playerState.setFileUrl(Res.getUri("files/audio/${currentZekr.audio}"))
-                            playerState.seekTo(0)
-                            playerState.play()
-                            kotlinx.coroutines.delay(200)
-                            isChangingZekr = false
-                        }
+                        // تغيير العداد سيؤدي إلى إعادة تشغيل الـ LaunchedEffect الخاص بـ currentZekr و remainingRepetitions
+                        remainingRepetitions--
                     } else {
                         // عند اكتمال كل التكرارات للذكر الحالي:
                         if (currentIndex < azkar.size - 1) {
                             currentIndex++
-                            // الـ LaunchedEffect الخاص بـ currentIndex سيتولى ضبط عداد الذكر الجديد وتشغيل صوته
                         } else {
                             isSpeaking = false
                             playerState.stop()
