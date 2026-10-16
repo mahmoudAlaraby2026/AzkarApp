@@ -798,7 +798,10 @@ fun AzkarReaderScreen(
     var isSpeaking by remember { mutableStateOf(false) }
     var isChangingZekr by remember { mutableStateOf(false) }
 
-    LaunchedEffect(currentZekr, remainingRepetitions) {
+    val scope = rememberCoroutineScope()
+    var isHandlingEnded by remember { mutableStateOf(false) }
+
+    LaunchedEffect(currentZekr) {
         isChangingZekr = true
         playerState.stop()
         kotlinx.coroutines.delay(100)
@@ -825,18 +828,31 @@ fun AzkarReaderScreen(
     LaunchedEffect(playerState) {
         playerState.observePlayerEvent().collect { event ->
             if (event is io.github.rufenkhokhar.KMPPlayerEvent.Ended) {
-                if (isSpeaking && !isChangingZekr) {
-                    if (remainingRepetitions > 1) {
-                        // تغيير العداد سيؤدي إلى إعادة تشغيل الـ LaunchedEffect الخاص بـ currentZekr و remainingRepetitions
-                        remainingRepetitions--
-                    } else {
-                        // عند اكتمال كل التكرارات للذكر الحالي:
-                        if (currentIndex < azkar.size - 1) {
-                            currentIndex++
-                        } else {
-                            isSpeaking = false
+                if (isSpeaking && !isChangingZekr && !isHandlingEnded) {
+                    scope.launch {
+                        isHandlingEnded = true
+                        if (remainingRepetitions > 1) {
+                            remainingRepetitions--
+                            
+                            // Re-set audio url just to be sure it repeats correctly
                             playerState.stop()
+                            kotlinx.coroutines.delay(100)
+                            playerState.setFileUrl(Res.getUri("files/audio/${currentZekr.audio}"))
+                            playerState.seekTo(0)
+                            kotlinx.coroutines.delay(100)
+                            playerState.play()
+                            
+                        } else {
+                            // عند اكتمال كل التكرارات للذكر الحالي:
+                            if (currentIndex < azkar.size - 1) {
+                                currentIndex++
+                            } else {
+                                isSpeaking = false
+                                playerState.stop()
+                            }
                         }
+                        kotlinx.coroutines.delay(1000) // Debounce End event to avoid double triggering
+                        isHandlingEnded = false
                     }
                 }
             } else if (event is io.github.rufenkhokhar.KMPPlayerEvent.Error) {
