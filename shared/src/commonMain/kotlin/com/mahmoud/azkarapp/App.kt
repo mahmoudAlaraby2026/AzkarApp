@@ -819,18 +819,15 @@ fun AzkarReaderScreen(
                 if (!isSpeaking) return@collect
                 if (remainingRepetitions > 1) {
                     remainingRepetitions--
-                    delay(1000)
-                    if (isSpeaking && currentZekr.audio.isNotBlank()) {
-                        playerState.setFileUrl(Res.getUri("files/audio/${currentZekr.audio}"))
-                        playerState.seekTo(0)
-                        playerState.play()
-                    }
+                    playerState.seekTo(0)
+                    playerState.play()
                 } else {
                     // Automatically move to the next Zekr when done reading completely
                     if (currentIndex < azkar.size - 1) {
                         currentIndex++
                     } else {
                         isSpeaking = false
+                        playerState.stop()
                     }
                 }
             } else if (event is io.github.rufenkhokhar.KMPPlayerEvent.Error) {
