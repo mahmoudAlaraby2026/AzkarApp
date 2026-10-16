@@ -798,8 +798,7 @@ fun AzkarReaderScreen(
     var isSpeaking by remember { mutableStateOf(false) }
     var isChangingZekr by remember { mutableStateOf(false) }
 
-    val scope = rememberCoroutineScope()
-    var isHandlingEnded by remember { mutableStateOf(false) }
+    val coroutineScope = rememberCoroutineScope()
 
     LaunchedEffect(currentZekr) {
         isChangingZekr = true
@@ -828,29 +827,27 @@ fun AzkarReaderScreen(
     LaunchedEffect(playerState) {
         playerState.observePlayerEvent().collect { event ->
             if (event is io.github.rufenkhokhar.KMPPlayerEvent.Ended) {
-                if (isSpeaking && !isChangingZekr && !isHandlingEnded) {
-                    scope.launch {
-                        isHandlingEnded = true
-                        if (remainingRepetitions > 1) {
-                            remainingRepetitions--
-                            
-                            // Just seek to 0 and play to repeat
-                            playerState.pause()
-                            playerState.seekTo(0)
-                            kotlinx.coroutines.delay(50)
-                            playerState.play()
-                            
-                        } else {
-                            // عند اكتمال كل التكرارات للذكر الحالي:
-                            if (currentIndex < azkar.size - 1) {
-                                currentIndex++
-                            } else {
-                                isSpeaking = false
-                                playerState.stop()
+                if (isSpeaking) {
+                    if (remainingRepetitions > 1) {
+                        remainingRepetitions--
+                        coroutineScope.launch {
+                            // إيقاف المشغل أولاً لتهيئة AVPlayer على iOS
+                            playerState.stop()
+                            kotlinx.coroutines.delay(150)
+                            if (currentZekr.audio.isNotBlank()) {
+                                val audioUri = Res.getUri("files/audio/${currentZekr.audio}")
+                                playerState.setFileUrl(audioUri)
+                                playerState.play()
                             }
                         }
-                        kotlinx.coroutines.delay(200) // Debounce End event to avoid double triggering
-                        isHandlingEnded = false
+                    } else {
+                        // اكتملت تكرارات الذكر الحالي
+                        if (currentIndex < azkar.size - 1) {
+                            currentIndex++
+                        } else {
+                            isSpeaking = false
+                            playerState.stop()
+                        }
                     }
                 }
             } else if (event is io.github.rufenkhokhar.KMPPlayerEvent.Error) {
