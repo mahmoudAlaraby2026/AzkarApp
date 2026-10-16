@@ -1,4 +1,7 @@
-@file:OptIn(org.jetbrains.compose.resources.ExperimentalResourceApi::class)
+@file:OptIn(
+    org.jetbrains.compose.resources.ExperimentalResourceApi::class,
+    kotlin.ExperimentalMultiplatform::class
+)
 package com.mahmoud.azkarapp
 
 import androidx.compose.animation.*
