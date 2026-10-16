@@ -818,14 +818,20 @@ fun AzkarReaderScreen(
     }
 
     LaunchedEffect(playerState) {
+        val scope = this
         playerState.observePlayerEvent().collect { event ->
             if (event is io.github.rufenkhokhar.KMPPlayerEvent.Ended) {
                 if (isSpeaking && !isChangingZekr) {
                     if (remainingRepetitions > 1) {
-                        remainingRepetitions--
-                        // تأكد من إعادة التشغيل بشكل سليم:
-                        playerState.seekTo(0)
-                        playerState.play()
+                        scope.launch {
+                            remainingRepetitions--
+                            // في iOS يجب إرجاع الوقت إلى 0 ثم تشغيل الصوت
+                            playerState.seekTo(0)
+                            // إعادة تمرير مسار الملف مجدداً لضمان إعادة تفعيل المشغل
+                            playerState.setFileUrl(Res.getUri("files/audio/${currentZekr.audio}"))
+                            kotlinx.coroutines.delay(100)
+                            playerState.play()
+                        }
                     } else {
                         // عند اكتمال كل التكرارات للذكر الحالي:
                         if (currentIndex < azkar.size - 1) {
