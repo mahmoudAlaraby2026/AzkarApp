@@ -834,12 +834,10 @@ fun AzkarReaderScreen(
                         if (remainingRepetitions > 1) {
                             remainingRepetitions--
                             
-                            // Re-set audio url just to be sure it repeats correctly
-                            playerState.stop()
-                            kotlinx.coroutines.delay(100)
-                            playerState.setFileUrl(Res.getUri("files/audio/${currentZekr.audio}"))
+                            // Just seek to 0 and play to repeat
+                            playerState.pause()
                             playerState.seekTo(0)
-                            kotlinx.coroutines.delay(100)
+                            kotlinx.coroutines.delay(50)
                             playerState.play()
                             
                         } else {
@@ -851,7 +849,7 @@ fun AzkarReaderScreen(
                                 playerState.stop()
                             }
                         }
-                        kotlinx.coroutines.delay(1000) // Debounce End event to avoid double triggering
+                        kotlinx.coroutines.delay(200) // Debounce End event to avoid double triggering
                         isHandlingEnded = false
                     }
                 }
