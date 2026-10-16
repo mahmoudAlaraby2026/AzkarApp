@@ -795,7 +795,13 @@ fun AzkarReaderScreen(
 
     LaunchedEffect(currentIndex) {
         playerState.stop()
-        isSpeaking = false
+        if (isSpeaking && currentZekr.audio.isNotBlank()) {
+            playerState.setFileUrl(Res.getUri("files/audio/${currentZekr.audio}"))
+            playerState.seekTo(0)
+            playerState.play()
+        } else {
+            isSpeaking = false
+        }
     }
 
     DisposableEffect(Unit) {
@@ -815,13 +821,15 @@ fun AzkarReaderScreen(
                     delay(1000)
                     if (isSpeaking && currentZekr.audio.isNotBlank()) {
                         playerState.setFileUrl(Res.getUri("files/audio/${currentZekr.audio}"))
+                        playerState.seekTo(0)
                         playerState.play()
                     }
                 } else {
-                    isSpeaking = false
                     // Automatically move to the next Zekr when done reading completely
                     if (currentIndex < azkar.size - 1) {
                         currentIndex++
+                    } else {
+                        isSpeaking = false
                     }
                 }
             } else if (event is io.github.rufenkhokhar.KMPPlayerEvent.Error) {
