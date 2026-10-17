@@ -63,6 +63,7 @@ import coil3.compose.AsyncImage
 import azkarapp.shared.generated.resources.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.onEach
 
@@ -797,22 +798,6 @@ fun AzkarReaderScreen(
     val playerState = io.github.rufenkhokhar.rememberKMPPlayerState()
     var isSpeaking by remember { mutableStateOf(false) }
 
-    val coroutineScope = rememberCoroutineScope()
-
-    LaunchedEffect(currentIndex) {
-        playerState.stop()
-        kotlinx.coroutines.delay(100)
-        if (isSpeaking && currentZekr.audio.isNotBlank()) {
-            val audioFile = currentZekr.audio.trim()
-            playerState.setFileUrl(Res.getUri("files/audio/$audioFile"))
-            playerState.seekTo(0)
-            kotlinx.coroutines.delay(100)
-            playerState.play()
-        } else {
-            isSpeaking = false
-        }
-    }
-
     DisposableEffect(Unit) {
         onDispose {
             isSpeaking = false
@@ -821,34 +806,39 @@ fun AzkarReaderScreen(
         }
     }
 
-    LaunchedEffect(playerState) {
-        playerState.observePlayerEvent().collect { event ->
-            if (event is io.github.rufenkhokhar.KMPPlayerEvent.Ended) {
-                if (isSpeaking) {
-                    if (remainingRepetitions > 1) {
-                        // الذكر لم يكتمل بعد: أنقص العداد وأعد تشغيل نفس المقطع
-                        remainingRepetitions--
-                        coroutineScope.launch {
-                            playerState.stop()
-                            kotlinx.coroutines.delay(100)
-                            val audioUri = Res.getUri("files/audio/${currentZekr.audio.trim()}")
-                            playerState.setFileUrl(audioUri)
-                            playerState.play()
-                        }
-                    } else {
-                        // هنا فقط، بعد انتهاء جميع التكرارات (العداد وصل 1):
-                        if (currentIndex < azkar.size - 1) {
-                            currentIndex++
-                            // ملاحظة: الـ LaunchedEffect الخاص بتغيير currentIndex سيتكفل ببدء الذكر الجديد
-                        } else {
-                            isSpeaking = false
-                            playerState.stop()
-                        }
-                    }
+    LaunchedEffect(currentIndex, isSpeaking) {
+        if (isSpeaking && currentZekr.audio.isNotBlank()) {
+            // إعادة تعيين العداد للذكر الحالي
+            remainingRepetitions = currentZekr.count
+            
+            while (remainingRepetitions > 0 && isSpeaking) {
+                val audioUri = Res.getUri("files/audio/${currentZekr.audio.trim()}")
+                playerState.stop()
+                kotlinx.coroutines.delay(100)
+                playerState.setFileUrl(audioUri)
+                playerState.play()
+                
+                // انتظار اكتمال تشغيل المقطع الحالي حتى حدث Ended
+                playerState.observePlayerEvent().firstOrNull { event ->
+                    event is io.github.rufenkhokhar.KMPPlayerEvent.Ended || event is io.github.rufenkhokhar.KMPPlayerEvent.Error
                 }
-            } else if (event is io.github.rufenkhokhar.KMPPlayerEvent.Error) {
-                isSpeaking = false
+                
+                // إنقاص العداد بعد انتهاء التكرار الفعلي
+                remainingRepetitions--
+                kotlinx.coroutines.delay(150)
             }
+            
+            // بعد انتهاء جميع التكرارات بنجاح:
+            if (isSpeaking) {
+                if (currentIndex < azkar.size - 1) {
+                    currentIndex++
+                } else {
+                    isSpeaking = false
+                    playerState.stop()
+                }
+            }
+        } else {
+            playerState.stop()
         }
     }
 
