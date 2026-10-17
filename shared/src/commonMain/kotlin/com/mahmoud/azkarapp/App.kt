@@ -805,7 +805,8 @@ fun AzkarReaderScreen(
         playerState.stop()
         kotlinx.coroutines.delay(100)
         if (isSpeaking && currentZekr.audio.isNotBlank()) {
-            playerState.setFileUrl(Res.getUri("files/audio/${currentZekr.audio}"))
+            val audioFile = currentZekr.audio.trim()
+            playerState.setFileUrl(Res.getUri("files/audio/$audioFile"))
             playerState.seekTo(0)
             kotlinx.coroutines.delay(100)
             playerState.play()
@@ -818,27 +819,23 @@ fun AzkarReaderScreen(
 
     DisposableEffect(Unit) {
         onDispose {
+            isSpeaking = false
             playerState.stop()
             playerState.destroy()
-            isSpeaking = false
         }
     }
 
     LaunchedEffect(playerState) {
         playerState.observePlayerEvent().collect { event ->
             if (event is io.github.rufenkhokhar.KMPPlayerEvent.Ended) {
-                if (isSpeaking) {
+                if (isSpeaking && !isChangingZekr) {
                     if (remainingRepetitions > 1) {
                         remainingRepetitions--
                         coroutineScope.launch {
-                            // إيقاف المشغل أولاً لتهيئة AVPlayer على iOS
-                            playerState.stop()
-                            kotlinx.coroutines.delay(150)
-                            if (currentZekr.audio.isNotBlank()) {
-                                val audioUri = Res.getUri("files/audio/${currentZekr.audio}")
-                                playerState.setFileUrl(audioUri)
-                                playerState.play()
-                            }
+                            isChangingZekr = true
+                            playerState.seekTo(0)
+                            playerState.play()
+                            isChangingZekr = false
                         }
                     } else {
                         // اكتملت تكرارات الذكر الحالي
@@ -989,11 +986,12 @@ fun AzkarReaderScreen(
                 onClick = { 
                     if (currentZekr.audio.isNotBlank()) {
                         if (isSpeaking) {
-                            playerState.stop()
                             isSpeaking = false
+                            playerState.stop()
                         } else {
                             isSpeaking = true
-                            playerState.setFileUrl(Res.getUri("files/audio/${currentZekr.audio}"))
+                            val audioFile = currentZekr.audio.trim()
+                            playerState.setFileUrl(Res.getUri("files/audio/$audioFile"))
                             playerState.play()
                         }
                     }
