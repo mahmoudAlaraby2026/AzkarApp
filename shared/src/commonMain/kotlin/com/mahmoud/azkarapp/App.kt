@@ -792,16 +792,14 @@ fun AzkarReaderScreen(
 
     var currentIndex by remember { mutableStateOf(0) }
     val currentZekr = azkar[currentIndex]
-    var remainingRepetitions by remember(currentZekr) { mutableStateOf(currentZekr.count) }
+    var remainingRepetitions by remember(currentIndex) { mutableStateOf(currentZekr.count) }
 
     val playerState = io.github.rufenkhokhar.rememberKMPPlayerState()
     var isSpeaking by remember { mutableStateOf(false) }
-    var isChangingZekr by remember { mutableStateOf(false) }
 
     val coroutineScope = rememberCoroutineScope()
 
-    LaunchedEffect(currentZekr) {
-        isChangingZekr = true
+    LaunchedEffect(currentIndex) {
         playerState.stop()
         kotlinx.coroutines.delay(100)
         if (isSpeaking && currentZekr.audio.isNotBlank()) {
@@ -813,8 +811,6 @@ fun AzkarReaderScreen(
         } else {
             isSpeaking = false
         }
-        kotlinx.coroutines.delay(200)
-        isChangingZekr = false
     }
 
     DisposableEffect(Unit) {
@@ -828,19 +824,22 @@ fun AzkarReaderScreen(
     LaunchedEffect(playerState) {
         playerState.observePlayerEvent().collect { event ->
             if (event is io.github.rufenkhokhar.KMPPlayerEvent.Ended) {
-                if (isSpeaking && !isChangingZekr) {
+                if (isSpeaking) {
                     if (remainingRepetitions > 1) {
+                        // الذكر لم يكتمل بعد: أنقص العداد وأعد تشغيل نفس المقطع
                         remainingRepetitions--
                         coroutineScope.launch {
-                            isChangingZekr = true
-                            playerState.seekTo(0)
+                            playerState.stop()
+                            kotlinx.coroutines.delay(100)
+                            val audioUri = Res.getUri("files/audio/${currentZekr.audio.trim()}")
+                            playerState.setFileUrl(audioUri)
                             playerState.play()
-                            isChangingZekr = false
                         }
                     } else {
-                        // اكتملت تكرارات الذكر الحالي
+                        // هنا فقط، بعد انتهاء جميع التكرارات (العداد وصل 1):
                         if (currentIndex < azkar.size - 1) {
                             currentIndex++
+                            // ملاحظة: الـ LaunchedEffect الخاص بتغيير currentIndex سيتكفل ببدء الذكر الجديد
                         } else {
                             isSpeaking = false
                             playerState.stop()
@@ -848,9 +847,7 @@ fun AzkarReaderScreen(
                     }
                 }
             } else if (event is io.github.rufenkhokhar.KMPPlayerEvent.Error) {
-                if (!isChangingZekr) {
-                    isSpeaking = false
-                }
+                isSpeaking = false
             }
         }
     }
