@@ -36,9 +36,12 @@ kotlin {
     }
     
     sourceSets {
-        androidMain.dependencies {
-            implementation(libs.compose.uiToolingPreview)
-            implementation(libs.androidx.work.runtime.ktx)
+        androidMain {
+            resources.srcDirs(layout.buildDirectory.dir("generated/compose/packagedResources"))
+            dependencies {
+                implementation(libs.compose.uiToolingPreview)
+                implementation(libs.androidx.work.runtime.ktx)
+            }
         }
         commonMain.dependencies {
             implementation(libs.compose.runtime)
@@ -62,6 +65,10 @@ kotlin {
     }
 }
 
+compose.resources {
+    packageOfResClass = "azkarapp.shared.generated.resources"
+}
+
 dependencies {
     androidRuntimeClasspath(libs.compose.uiTooling)
 }
@@ -79,4 +86,20 @@ tasks.matching { it.name.startsWith("generateComposeResClass") }.configureEach {
             }
         }
     }
+}
+
+val copyComposeResourcesWithPackage = tasks.register("copyComposeResourcesWithPackage", Copy::class) {
+    dependsOn(tasks.matching { it.name.startsWith("prepareComposeResources") })
+    into(layout.buildDirectory.dir("generated/compose/packagedResources"))
+    
+    into("composeResources") {
+        from(layout.buildDirectory.dir("generated/compose/resourceGenerator/preparedResources/commonMain/composeResources"))
+    }
+    into("composeResources/azkarapp.shared.generated.resources") {
+        from(layout.buildDirectory.dir("generated/compose/resourceGenerator/preparedResources/commonMain/composeResources"))
+    }
+}
+
+tasks.matching { it.name.startsWith("compileKotlinAndroid") || it.name.startsWith("process") }.configureEach {
+    dependsOn(copyComposeResourcesWithPackage)
 }

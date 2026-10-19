@@ -1,3 +1,4 @@
+@file:OptIn(org.jetbrains.compose.resources.ExperimentalResourceApi::class)
 package com.mahmoud.azkarapp
 
 import android.os.Build
@@ -98,6 +99,35 @@ class AndroidPlatform(private val context: Context) : Platform {
             vibrator.vibrate(android.os.VibrationEffect.createOneShot(duration, android.os.VibrationEffect.DEFAULT_AMPLITUDE))
         } else {
             vibrator.vibrate(duration)
+        }
+    }
+
+    override fun getCachedAudioFile(fileName: String): String? {
+        return try {
+            val cacheDir = java.io.File(context.cacheDir, "audio_cache")
+            val file = java.io.File(cacheDir, fileName)
+            if (file.exists() && file.length() > 0) {
+                file.absolutePath
+            } else {
+                null
+            }
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    override fun saveAudioToCache(fileName: String, bytes: ByteArray): String? {
+        return try {
+            val cacheDir = java.io.File(context.cacheDir, "audio_cache")
+            val file = java.io.File(cacheDir, fileName)
+            file.parentFile?.mkdirs()
+            if (!file.exists() || file.length() != bytes.size.toLong()) {
+                file.writeBytes(bytes)
+            }
+            file.absolutePath
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
         }
     }
 }

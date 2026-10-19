@@ -1,3 +1,4 @@
+@file:OptIn(org.jetbrains.compose.resources.ExperimentalResourceApi::class)
 package com.mahmoud.azkarapp
 
 import androidx.compose.foundation.BorderStroke
@@ -61,7 +62,7 @@ fun ForcedUpdateDialog(
                     border = BorderStroke(1.dp, HeaderGreen.copy(alpha = 0.2f))
                 ) {
                     AsyncImage(
-                        model = Res.drawable.img_azkar,
+                        model = Res.drawable.hadith_icon,
                         contentDescription = null,
                         modifier = Modifier.padding(10.dp).fillMaxSize(),
                         contentScale = androidx.compose.ui.layout.ContentScale.Fit

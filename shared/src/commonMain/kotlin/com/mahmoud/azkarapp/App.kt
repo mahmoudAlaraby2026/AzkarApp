@@ -201,8 +201,12 @@ fun App() {
             shouldShowUpdateDialog = true
         }
 
-        allAzkar = repository.loadAzkar()
-        allHadiths = repository.loadHadiths()
+        try {
+            allAzkar = repository.loadAzkar()
+            allHadiths = repository.loadHadiths()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
         kotlinx.coroutines.delay(1500)
         currentScreen = Screen.Home
     }
@@ -344,7 +348,7 @@ fun MainContent(
                             border = BorderStroke(2.dp, Color.White.copy(alpha = 0.5f))
                         ) {
                             Image(
-                                painter = painterResource(Res.drawable.img_azkar),
+                                painter = painterResource(Res.drawable.hadith_icon),
                                 contentDescription = null,
                                 modifier = Modifier.fillMaxSize().padding(10.dp),
                                 contentScale = ContentScale.Fit
@@ -811,30 +815,44 @@ fun AzkarReaderScreen(
             // إعادة تعيين العداد للذكر الحالي
             remainingRepetitions = currentZekr.count
             
-            while (remainingRepetitions > 0 && isSpeaking) {
-                val audioUri = Res.getUri("files/audio/${currentZekr.audio.trim()}")
-                playerState.stop()
-                kotlinx.coroutines.delay(100)
-                playerState.setFileUrl(audioUri)
-                playerState.play()
-                
-                // انتظار اكتمال تشغيل المقطع الحالي حتى حدث Ended
-                playerState.observePlayerEvent().firstOrNull { event ->
-                    event is io.github.rufenkhokhar.KMPPlayerEvent.Ended || event is io.github.rufenkhokhar.KMPPlayerEvent.Error
+            val audioFile = currentZekr.audio.trim()
+            var localPath = getPlatform().getCachedAudioFile(audioFile)
+            if (localPath.isNullOrBlank()) {
+                try {
+                    val bytes = Res.readBytes("files/audio/$audioFile")
+                    localPath = getPlatform().saveAudioToCache(audioFile, bytes)
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
+
+            if (localPath.isNullOrBlank()) {
+                isSpeaking = false
+            } else {
+                while (remainingRepetitions > 0 && isSpeaking) {
+                    playerState.stop()
+                    kotlinx.coroutines.delay(100)
+                    playerState.setLocalFile(localPath)
+                    playerState.play()
+                    
+                    // انتظار اكتمال تشغيل المقطع الحالي حتى حدث Ended
+                    playerState.observePlayerEvent().firstOrNull { event ->
+                        event is io.github.rufenkhokhar.KMPPlayerEvent.Ended || event is io.github.rufenkhokhar.KMPPlayerEvent.Error
+                    }
+                    
+                    // إنقاص العداد بعد انتهاء التكرار الفعلي
+                    remainingRepetitions--
+                    kotlinx.coroutines.delay(150)
                 }
                 
-                // إنقاص العداد بعد انتهاء التكرار الفعلي
-                remainingRepetitions--
-                kotlinx.coroutines.delay(150)
-            }
-            
-            // بعد انتهاء جميع التكرارات بنجاح:
-            if (isSpeaking) {
-                if (currentIndex < azkar.size - 1) {
-                    currentIndex++
-                } else {
-                    isSpeaking = false
-                    playerState.stop()
+                // بعد انتهاء جميع التكرارات بنجاح:
+                if (isSpeaking) {
+                    if (currentIndex < azkar.size - 1) {
+                        currentIndex++
+                    } else {
+                        isSpeaking = false
+                        playerState.stop()
+                    }
                 }
             }
         } else {
@@ -977,9 +995,6 @@ fun AzkarReaderScreen(
                             playerState.stop()
                         } else {
                             isSpeaking = true
-                            val audioFile = currentZekr.audio.trim()
-                            playerState.setFileUrl(Res.getUri("files/audio/$audioFile"))
-                            playerState.play()
                         }
                     }
                 },

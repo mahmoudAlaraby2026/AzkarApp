@@ -1,3 +1,4 @@
+@file:OptIn(org.jetbrains.compose.resources.ExperimentalResourceApi::class)
 package com.mahmoud.azkarapp
 
 import azkarapp.shared.generated.resources.Res
@@ -9,13 +10,23 @@ class AzkarRepository {
 
     @OptIn(ExperimentalResourceApi::class)
     suspend fun loadAzkar(): List<Zekr> {
-        val bytes = Res.readBytes("files/azkar.json")
-        return json.decodeFromString(bytes.decodeToString())
+        return try {
+            val bytes = Res.readBytes("files/azkar.json")
+            json.decodeFromString(bytes.decodeToString())
+        } catch (e: Exception) {
+            e.printStackTrace()
+            emptyList()
+        }
     }
 
     @OptIn(ExperimentalResourceApi::class)
     suspend fun loadHadiths(): List<Hadith> {
-        val bytes = Res.readBytes("files/hadith.json")
-        return json.decodeFromString(bytes.decodeToString())
+        return try {
+            val bytes = Res.readBytes("files/hadith.json")
+            json.decodeFromString(bytes.decodeToString())
+        } catch (e: Exception) {
+            e.printStackTrace()
+            emptyList()
+        }
     }
 }
