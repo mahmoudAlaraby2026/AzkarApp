@@ -117,6 +117,7 @@ class AndroidPlatform(private val context: Context) : Platform {
     }
 
     override fun saveAudioToCache(fileName: String, bytes: ByteArray): String? {
+        if (bytes.isEmpty()) return null
         return try {
             val cacheDir = java.io.File(context.cacheDir, "audio_cache")
             val file = java.io.File(cacheDir, fileName)

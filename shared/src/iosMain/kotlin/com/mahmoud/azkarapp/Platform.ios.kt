@@ -83,15 +83,13 @@ class IOSPlatform: Platform {
                 )
             }
             
-            if (!fileManager.fileExistsAtPath(filePath)) {
-                val nsData = bytes.usePinned { pinned ->
-                    NSData.create(
-                        bytes = pinned.addressOf(0),
-                        length = bytes.size.toULong()
-                    )
-                }
-                nsData.writeToFile(filePath, atomically = true)
+            val nsData = bytes.usePinned { pinned ->
+                NSData.create(
+                    bytes = pinned.addressOf(0),
+                    length = bytes.size.toULong()
+                )
             }
+            nsData.writeToFile(filePath, atomically = true)
             filePath
         } catch (e: Exception) {
             e.printStackTrace()

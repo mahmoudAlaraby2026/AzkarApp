@@ -816,14 +816,15 @@ fun AzkarReaderScreen(
             remainingRepetitions = currentZekr.count
             
             val audioFile = currentZekr.audio.trim()
-            var localPath = getPlatform().getCachedAudioFile(audioFile)
+            var localPath: String? = null
+            try {
+                val bytes = Res.readBytes("files/audio/$audioFile")
+                localPath = getPlatform().saveAudioToCache(audioFile, bytes)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
             if (localPath.isNullOrBlank()) {
-                try {
-                    val bytes = Res.readBytes("files/audio/$audioFile")
-                    localPath = getPlatform().saveAudioToCache(audioFile, bytes)
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                }
+                localPath = getPlatform().getCachedAudioFile(audioFile)
             }
 
             if (localPath.isNullOrBlank()) {
